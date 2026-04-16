@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ASCII Camera</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Fira+Code&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0c10;
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --accent: #45f3ff;
+      --accent-hover: #00d2ff;
+      --text: #c5c6c7;
+      --text-glow: 0 0 10px rgba(69, 243, 255, 0.3);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      background: linear-gradient(135deg, var(--bg-color), #1f2833); 
+      color: var(--text); 
+      font-family: 'Outfit', sans-serif; 
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+
+    h2 { 
+      font-size: 32px; 
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: var(--text-glow);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    
+    .control-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .row { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 16px; 
+      align-items: center; 
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+    }
+
+    label { font-size: 14px; color: #ddd; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+    /* Custom Range Slider */
+    input[type=range] { 
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px; width: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      margin-top: -6px;
+      box-shadow: 0 0 10px var(--accent);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 4px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .val { 
+      font-family: 'Fira Code', monospace;
+      font-size: 13px; 
+      color: var(--accent); 
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      min-width: 44px;
+      text-align: center;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    select { 
+      background: rgba(0, 0, 0, 0.5); 
+      color: #fff; 
+      border: 1px solid var(--glass-border); 
+      padding: 8px 12px; 
+      border-radius: 8px; 
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px; 
+      outline: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    select:hover { border-color: var(--accent); }
+
+    /* Checkboxes */
+    input[type="checkbox"] {
+      appearance: none;
+      width: 18px; height: 18px;
+      border: 2px solid #555;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.2);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    input[type="checkbox"]:checked::after {
+      content: '✔';
+      position: absolute;
+      color: #000;
+      font-size: 12px;
+      font-weight: bold;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 24px; 
+      border-radius: 30px; 
+      border: none;
+      background: linear-gradient(45deg, var(--accent), var(--accent-hover)); 
+      color: #0b0c10; 
+      cursor: pointer; 
+      font-weight: 600;
+      font-size: 15px; 
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 4px 15px rgba(69, 243, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 6px 20px rgba(69, 243, 255, 0.6);
+    }
+    button:active {
+      transform: translateY(0px);
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      box-shadow: none;
+      border: 1px solid var(--glass-border);
+    }
+    button.secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    button.danger {
+      background: linear-gradient(45deg, #ff4b2b, #ff416c);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+    }
+    button.danger:hover {
+      box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
+    }
+
+    /* Terminal Output */
+    .terminal-wrapper {
+      position: relative;
+      background: #050505;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .terminal-header {
+      background: #1a1a24;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .mac-btn {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .close { background: #ff5f56; }
+    .minimize { background: #ffbd2e; }
+    .maximize { background: #27c93f; }
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      font-family: 'Fira Code', monospace;
+    }
+
+    #ascii-output {
+      font-family: 'Fira Code', monospace;
+      font-size: 6px;
+      line-height: 1.15;
+      white-space: pre;
+      color: #45f3ff;
+      padding: 20px;
+      width: 100%;
+      min-height: 300px;
+      overflow-x: auto;
+      text-align: center;
+    }
+    
+    #stat { 
+      font-family: 'Fira Code', monospace;
+      font-size: 12px; 
+      color: #666;
+      padding: 8px 16px;
+      background: #111;
+      text-align: right;
+    }
+    #error-msg { 
+      color: #ff4b2b; 
+      font-size: 14px; 
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    video, canvas { display: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+    @media (max-width: 768px) {
+      .controls-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<h2>ASCII Camera</h2>
+
+<div class="container">
+  
+  <div class="panel">
+    <div class="btn-group">
+      <button id="start-btn" onclick="startCamera()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        Initialize Camera
+      </button>
+      <button id="stop-btn" onclick="stopCamera()" class="danger" style="display:none">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+        Kill Camera
+      </button>
+      <button class="secondary" onclick="snapFrame()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Freeze Frame
+      </button>
+      <button class="secondary" onclick="copyASCII()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        Copy Art
+      </button>
+    </div>
+
+    <div class="controls-grid">
+      <div class="control-group">
+        <div class="control-header">Output Dimensions</div>
+        <div class="slider-wrap">
+          <label for="cols">Width</label>
+          <input type="range" id="cols" min="40" max="180" value="100" step="5" oninput="cols=+this.value;document.getElementById('cols-val').textContent=this.value">
+          <span class="val" id="cols-val">100</span>
+        </div>
+        <div class="slider-wrap">
+          <label for="fps">Speed (FPS)</label>
+          <input type="range" id="fps" min="1" max="30" value="15" step="1" oninput="fpsInterval=1000/+this.value;document.getElementById('fps-val').textContent=this.value">
+          <span class="val" id="fps-val">15</span>
+        </div>
+        <div class="slider-wrap">
+          <label for="contrast">Image Contrast</label>
+          <input type="range" id="contrast" min="0.5" max="3" value="1.2" step="0.1" oninput="document.getElementById('contrast-val').textContent=parseFloat(this.value).toFixed(1)">
+          <span class="val" id="contrast-val">1.2</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-header">Aesthetics & Filters</div>
+        <div class="row" style="justify-content: space-between;">
+          <label>Charset</label>
+          <select id="charset" onchange="setCharset(this.value)">
+            <option value="detailed">Detailed</option>
+            <option value="simple">Simple</option>
+            <option value="blocks">Blocks (Solid)</option>
+            <option value="minimal">Minimalist</option>
+            <option value="binary">Matrix (Binary)</option>
+          </select>
+        </div>
+        <div class="row" style="justify-content: space-between;">
+          <label>Theme</label>
+          <select id="colormode" onchange="setColorMode(this.value)">
+            <option value="green">Neon Green</option>
+            <option value="white">Ghost White</option>
+            <option value="blackwhite">Inverted (Black/White)</option>
+            <option value="color">True Color</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+          <label><input type="checkbox" id="invert"> Dark/Light Invert</label>
+          <label><input type="checkbox" id="mirror" checked> Lens Mirroring</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="error-msg"></div>
+
+  <div class="terminal-wrapper">
+    <div class="terminal-header">
+      <div class="mac-btn close"></div>
+      <div class="mac-btn minimize"></div>
+      <div class="mac-btn maximize"></div>
+      <div class="terminal-title">~/ascii-feed</div>
+    </div>
+    <div id="ascii-output">
+      Awaiting Camera Feed Initialization...
+    </div>
+    <div id="stat">0 × 0 Chars</div>
+  </div>
+
+</div>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+
+<script>
+const CHARSETS = {
+  detailed: ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$',
+  simple:   ' .:+*#@',
+  blocks:   ' ░▒▓█',
+  minimal:  ' -+|#',
+  binary:   ' 01'
+};
+
+let stream = null;
+let animFrame = null;
+let frozen = false;
+let cols = 100;
+let fpsInterval = 1000 / 15;
+let lastTime = 0;
+let charset = CHARSETS.detailed;
+let colorMode = 'green';
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const output = document.getElementById('ascii-output');
+const statEl = document.getElementById('stat');
+
+function setCharset(v) { charset = CHARSETS[v] || CHARSETS.detailed; }
+
+function setColorMode(v) {
+  colorMode = v;
+  if (v === 'blackwhite') {
+    output.style.background = '#fff';
+    output.style.color = '#111';
+    output.style.textShadow = 'none';
+  } else {
+    output.style.background = '#050505';
+    if (v === 'green') {
+      output.style.color = '#45f3ff'; /* Switched to cyan globally to match accent */
+      output.style.textShadow = '0 0 5px rgba(69, 243, 255, 0.5)';
+    } else {
+      output.style.color = '#fff';
+      output.style.textShadow = '0 0 5px rgba(255,255,255,0.4)';
+    }
+  }
+}
+
+// Initial setup to match our UI theme
+setColorMode('green');
+
+async function startCamera() {
+  document.getElementById('error-msg').textContent = '';
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    video.srcObject = stream;
+    await video.play();
+    document.getElementById('start-btn').style.display = 'none';
+    document.getElementById('stop-btn').style.display = 'flex'; // our button has flex
+    frozen = false;
+    loop();
+  } catch(e) {
+    document.getElementById('error-msg').textContent = '[ERROR] Access Denied: ' + e.message + ' - Localhost or HTTPS required for media device access.';
+  }
+}
+
+function stopCamera() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  cancelAnimationFrame(animFrame);
+  document.getElementById('start-btn').style.display = 'flex';
+  document.getElementById('stop-btn').style.display = 'none';
+  output.textContent = 'Connection Terminated.';
+  statEl.textContent = 'OFFLINE';
+}
+
+function snapFrame() { frozen = !frozen; }
+
+function loop(ts = 0) {
+  animFrame = requestAnimationFrame(loop);
+  if (frozen) return;
+  if (ts - lastTime < fpsInterval) return;
+  lastTime = ts;
+  render();
+}
+
+function render() {
+  if (!video.videoWidth) return;
+  const aspect = video.videoHeight / video.videoWidth;
+  const rows = Math.round(cols * aspect * 0.45);
+  canvas.width = cols;
+  canvas.height = rows;
+
+  ctx.filter = `contrast(${parseFloat(document.getElementById('contrast').value)})`;
+  if (document.getElementById('mirror').checked) {
+    ctx.translate(cols, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(video, 0, 0, cols, rows);
+  if (document.getElementById('mirror').checked) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  const data = ctx.getImageData(0, 0, cols, rows).data;
+  const invert = document.getElementById('invert').checked;
+  const len = charset.length - 1;
+
+  if (colorMode === 'color') {
+    let html = '';
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 4;
+        const r = data[i], g = data[i+1], b = data[i+2];
+        let lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+        if (invert) lum = 1 - lum;
+        const ch = charset[Math.round(lum * len)] || ' ';
+        html += `<span style="color:rgb(${r},${g},${b})">${ch === ' ' ? '&nbsp;' : ch}</span>`;
+      }
+      html += '\n';
+    }
+    output.innerHTML = html;
+  } else {
+    let text = '';
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 4;
+        let lum = (0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2]) / 255;
+        if (invert) lum = 1 - lum;
+        text += charset[Math.round(lum * len)];
+      }
+      text += '\n';
+    }
+    output.textContent = text;
+  }
+  statEl.textContent = `${cols} × ${rows} Chars`;
+}
+
+function copyASCII() {
+  const text = output.textContent || output.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Art successfully copied to clipboard.');
+  }).catch(() => {
+    alert('Clipboard transfer failed. Access may be restricted.');
+  });
+}
+</script>
+</body>
+</html>
