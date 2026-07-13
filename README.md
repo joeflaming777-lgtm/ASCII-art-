@@ -47,17 +47,6 @@ Designed for both creativity and performance, ASCII Camera runs entirely client-
 
 ASCII Camera runs high-performance rendering logic directly in the browser:
 
-```mermaid
-graph TD
-    A[Webcam Feed] -->|getUserMedia| B(HTML5 Video Element)
-    B -->|Frame Request Loop| C(HTML5 Canvas Context)
-    C -->|Pixel Extraction| D{Luminance Conversion}
-    D -->|True Color Mode| E[Color-Mapped HTML Span Elements]
-    D -->|Standard Mode| F[Monospace Character Map]
-    E --> G[Terminal Output Screen]
-    F --> G[Terminal Output Screen]
-```
-
 1. **Capture:** The browser requests webcam permissions and pipes the input stream into a hidden `<video>` element.
 2. **Draw:** An active `requestAnimationFrame` render loop draws the video frames onto an offscreen `<canvas>` at a throttled frame-rate.
 3. **Analyze:** JavaScript extracts raw pixel data. For each pixel, the luminance is calculated using standard color weightings:
